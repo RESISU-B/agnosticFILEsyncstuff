@@ -1,5 +1,6 @@
 import os
 import requests
+import urllib.parse
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
 SERVER_URL = "http://10.234.165.156:8000"
@@ -20,7 +21,7 @@ for fname in os.listdir(DIRECTORY):
     sig = key.sign(message)
 
     headers = {
-        "Filename": fname,
+        "Filename": urllib.parse.quote(fname),
         "Signature": sig.hex()
     }
 
