@@ -1,8 +1,10 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 import os
 
-UPLOAD_DIR = " "
+UPLOAD_DIR = r" "
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 if not os.path.exists("client.pub"):
@@ -42,6 +44,7 @@ class Handler(BaseHTTPRequestHandler):
 
             if not filename or not signature_hex:
                 raise ValueError("Missing headers")
+            data = self.rfile.read(length)
             if filename == "__shutdown__" and data == b"SHUTDOWN":
                 print("[*] Shutdown requested")
                 self.send_response(200)
@@ -49,10 +52,7 @@ class Handler(BaseHTTPRequestHandler):
                 import threading
                 threading.Thread(target=self.server.shutdown).start()
                 return
-
-            data = self.rfile.read(length)
             signature = bytes.fromhex(signature_hex)
-
             message = filename.encode() + b":" + data
             PUBLIC_KEY.verify(signature, message)
 
